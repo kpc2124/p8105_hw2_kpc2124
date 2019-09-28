@@ -42,6 +42,12 @@ precip_2018_df =
 precip_tidy = 
   bind_rows(precip_2017_df, precip_2018_df) %>% 
   janitor::clean_names() %>% 
-  mutate(month = month.name[month])
+  mutate(month = month.name[month]) %>%
+  select(month, year, total)
 ```
+
+The size of the Mr. Trash Wheel dataset is `r nrow(mtw_df) * ncol(mtw_df)` observations. The variables in this dataset are: `r colnames(mtw_df)`. The median number of sports balls in a dumpster in 2017 is `r median(pull(mtw_df,sports_balls)[ pull(mtw_df,year) == 2017])`. The size of the Precipitation dataset is `r nrow(precip_tidy) * ncol(precip_tidy)` observations. The precipitation dataset contains the variables: `r colnames(precip_tidy)`. The total precipitation in 2018 is `r sum(pull(precip_tidy,total)[pull(precip_tidy,year) == 2018])`.
+
+
+
 
