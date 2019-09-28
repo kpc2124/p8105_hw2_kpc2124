@@ -47,7 +47,7 @@ precip_tidy =
   select(month, year, total_precip)
 ```
 
-The size of the Mr. Trash Wheel dataset is `r nrow(mtw_df) * ncol(mtw_df)` observations. Some variables in this dataset are: `r colnames(mtw_df)[c(1,4,5,14)]`. The median number of sports balls in a dumpster in 2017 is `r median(pull(mtw_df,sports_balls)[ pull(mtw_df,year) == 2017])`. The size of the Precipitation dataset is `r nrow(precip_tidy) * ncol(precip_tidy)` observations. The precipitation dataset contains the variables: `r colnames(precip_tidy)`. The total precipitation in 2018 is `r sum(pull(precip_tidy,total_precip)[pull(precip_tidy,year) == 2018])`.
+The size of the Mr. Trash Wheel dataset is `r nrow(mtw_df) * ncol(mtw_df)` datapoints. Some variables in this dataset are: `r colnames(mtw_df)[c(1,4,5,14)]`. The median number of sports balls in a dumpster in 2017 is `r median(pull(mtw_df,sports_balls)[ pull(mtw_df,year) == 2017])`. The size of the Precipitation dataset is `r nrow(precip_tidy) * ncol(precip_tidy)` datapoints. The precipitation dataset contains the variables: `r colnames(precip_tidy)`. The total precipitation in 2018 is `r sum(pull(precip_tidy,total_precip)[pull(precip_tidy,year) == 2018])`.
 
 ## Problem 2
 
@@ -57,8 +57,46 @@ Cleaning the data in pols-month.csv
 pols_month_df = 
   read.csv("./data/pols-month.csv") %>%
   separate(mon, c("year","month","day"),sep = "-") %>%
-  mutate(month = as.integer(month), month = month.name[month], president = ifelse(prez_gop %in% c(1,2), "gop", ifelse(prez_dem %in% c(1,2), "dem", NA))) %>%
+  mutate(month = month.name[as.integer(month)], year = as.integer(year), president = ifelse(prez_gop %in% c(1,2), "gop", ifelse(prez_dem %in% c(1,2), "dem", NA))) %>%
   select(-prez_gop, -prez_dem, -day)
 ```
+
+Cleaning the data in snp.csv
+
+```{r}
+snp_df = 
+  read.csv("./data/snp.csv") %>%
+  separate(date, c("day","month","year"),sep = "/") %>%
+  mutate(month = month.name[as.integer(month)], year = as.integer(year)) %>%
+  rename(closing_stock_index = close) %>%
+  select(year, month, closing_stock_index, -day)
+```
+
+Cleaning the unemployment data
+
+```{r}
+unemployment_df = 
+  read.csv("./data/unemployment.csv") %>%
+  pivot_longer(
+    Jan:Dec,
+    names_to = "month",
+    values_to = "unemployment_percent"
+  ) %>%
+  mutate(month = month.name[match(month,month.abb)]) %>%
+  janitor::clean_names()
+```
+
+Merging the datasets
+
+```{r}
+pols_snp_data = 
+  left_join(pols_month_df, snp_df, by = c("year","month"))
+
+fte_data = 
+  left_join(pols_snp_data, unemployment_df, by = c("year","month"))
+```
+
+The `pols_month_df` contained data about the number of national politicians who are democratic or republic at any given time. The `snp_df` contained data about the S&P's stock market index on dates of observation. The `unemployment_df` contained data about the percentage of unemployment at dates of measurement. The resulting merged dataset has `r nrow(fte_data) * ncol(fte_data)` datapoints and `r nrow(fte_data)` observations. The years range from `r min(pull(fte_data,year))` to `r max(pull(fte_data,year))`. Some key variables are: `r colnames(fte_data)[c(1,2,9,10,11)]`.
+
 
 
