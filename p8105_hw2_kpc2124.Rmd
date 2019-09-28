@@ -9,5 +9,39 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(readxl)
+```
+
+## Problem 1
+
+Read and clean Mr. Trash Wheel sheet
+
+```{r}
+mtw_df = 
+  read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", range = "Mr. Trash Wheel!A2:N338") %>% 
+  janitor::clean_names() %>% 
+  drop_na(dumpster) %>% 
+  mutate(sports_balls = as.integer(round(sports_balls)))
+
+##specified sheet in range
+```
+
+Read and clean precipitation data for 2017 and 2018, combine them
+
+```{r}
+precip_2017_df = 
+  read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", range = "2017 Precipitation!A2:B14") %>% 
+  janitor::clean_names() %>%
+  mutate(year = 2017)
+
+precip_2018_df = 
+  read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",range = "2018 Precipitation!A2:B9") %>% 
+  janitor::clean_names() %>%
+  mutate(year = 2018)
+
+precip_tidy = 
+  bind_rows(precip_2017_df, precip_2018_df) %>% 
+  janitor::clean_names() %>% 
+  mutate(month = month.name[month])
 ```
 
