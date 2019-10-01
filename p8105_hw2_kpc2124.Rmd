@@ -3,6 +3,27 @@ title: "Homework 2"
 author: "Kristi Chau"
 date: "9/27/2019"
 output: github_document
+fig_caption: yes
+latex_engine: xelatex
+header-includes:
+   - \usepackage{floatrow}
+   - \floatsetup[figure]{capposition=top}
+   - \usepackage{booktabs}
+   - \usepackage{longtable}
+   - \usepackage{array}
+   - \usepackage{multirow}
+   - \usepackage{wrapfig}
+   - \usepackage{float}
+   - \usepackage{colortbl}
+   - \usepackage{pdflscape}
+   - \usepackage{tabu}
+   - \usepackage{threeparttable}
+   - \usepackage{threeparttablex}
+   - \usepackage[normalem]{ulem}
+   - \usepackage[normalem]{ulem}
+   - \usepackage[utf8]{inputenc}
+   - \usepackage{makecell}
+   - \usepackage{xcolor}
 ---
 
 ```{r setup, include=FALSE}
@@ -11,6 +32,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readxl)
 library(knitr)
+options(kableExtra.latex.load_packages = FALSE)
+library(kableExtra)
 ```
 
 ## Problem 1
@@ -27,7 +50,7 @@ mtw_df =
 ##specified sheet in range
 ```
 
-Read and clean precipitation data for 2017 and 2018, combine them
+Read and clean precipitation data for 2017 and 2018 and combine them
 
 ```{r}
 precip_2017_df = 
@@ -48,7 +71,9 @@ precip_tidy =
   select(month, year, total_precip)
 ```
 
-The size of the Mr. Trash Wheel dataset is `r nrow(mtw_df) * ncol(mtw_df)` datapoints. Some variables in this dataset are: `r colnames(mtw_df)[c(1,4,5,14)]`. The median number of sports balls in a dumpster in 2017 is `r median(pull(mtw_df,sports_balls)[ pull(mtw_df,year) == 2017])`. The size of the Precipitation dataset is `r nrow(precip_tidy) * ncol(precip_tidy)` datapoints. The precipitation dataset contains the variables: `r colnames(precip_tidy)`. The total precipitation in 2018 is `r sum(pull(precip_tidy,total_precip)[pull(precip_tidy,year) == 2018])`.
+There are `r nrow(mtw_df)` rows and `r ncol(mtw_df)` columns in the Mr. Trash Wheel dataset, giving us `r nrow(mtw_df) * ncol(mtw_df)` datapoints. Some variables in this dataset are: `r colnames(mtw_df)[c(1,4,5,14)]`. The median number of sports balls collected in dumpsters in 2017 was `r median(pull(mtw_df,sports_balls)[ pull(mtw_df,year) == 2017])`. 
+
+The Precipitation dataset has `r nrow(precip_tidy)` rows and `r ncol(precip_tidy)` columns, which is `r nrow(precip_tidy) * ncol(precip_tidy)` datapoints. The precipitation dataset contains the variables: `r colnames(precip_tidy)`. The total precipitation in 2018 was `r sum(pull(precip_tidy,total_precip)[pull(precip_tidy,year) == 2018])` inches.
 
 ## Problem 2
 
@@ -67,7 +92,7 @@ Cleaning the data in snp.csv
 ```{r}
 snp_df = 
   read.csv("./data/snp.csv") %>%
-  separate(date, c("day","month","year"),sep = "/") %>%
+  separate(date, c("day","month","year"),"/") %>%
   mutate(month = month.name[as.integer(month)], year = as.integer(year)) %>%
   rename(closing_stock_index = close) %>%
   select(year, month, closing_stock_index, -day)
@@ -97,7 +122,7 @@ fte_data =
   left_join(pols_snp_data, unemployment_df, by = c("year","month"))
 ```
 
-The `pols_month_df` contained data about the number of national politicians who are democratic or republic at any given time. The `snp_df` contained data about the S&P's stock market index on dates of observation. The `unemployment_df` contained data about the percentage of unemployment at dates of measurement. The resulting merged dataset has `r nrow(fte_data) * ncol(fte_data)` datapoints and `r nrow(fte_data)` observations. The years range from `r min(pull(fte_data,year))` to `r max(pull(fte_data,year))`. Some key variables are: `r colnames(fte_data)[c(1,2,9,10,11)]`.
+The `pols_month_df` contained data about the number of national politicians who are democratic or republic at any given time. The `snp_df` contained data about the S&P's stock market index on dates of observation. The `unemployment_df` contained data about the percentage of unemployment at dates of measurement. The resulting merged dataset has `r nrow(fte_data)` rows and `r ncol(fte_data)` columns containing `r nrow(fte_data) * ncol(fte_data)` datapoints. The years range from `r min(pull(fte_data,year))` to `r max(pull(fte_data,year))`. Some key variables are: `r colnames(fte_data)[c(1,2,9,10,11)]`.
 
 ## Problem 3
 
@@ -110,20 +135,20 @@ baby_names_data =
   distinct()
 ```
 
-Creating read-friendly tables
+Creating reader-friendly tables
 
 ```{r}
 baby_names_data %>%
   filter(childs_first_name == "Olivia") %>%
   arrange(year_of_birth) %>%
   select(year_of_birth, rank, ethnicity) %>%
-  kable(format = "pandoc", caption = "A ranking of the baby name Olivia over time")
+  kable(caption = "A ranking of the baby name Olivia over time")
 
 baby_names_data %>%
   filter(gender == "MALE" & rank == 1) %>%
   arrange(year_of_birth) %>%
   select(year_of_birth, childs_first_name, ethnicity) %>%
-  kable(format = "pandoc", caption = "Most popular male baby names over time")
+  kable(caption = "Most popular male baby names over time")
 ```
 
 Create a scatter plot
@@ -134,11 +159,12 @@ pop_vs_freq_names =
   filter(gender == "MALE" & year_of_birth == 2016 & ethnicity == "WHITE NON HISPANIC") %>%
   ggplot(aes(x = rank, y = count)) +
   geom_point() +
-  labs(title = "Name Popularity vs Frequency of Name for Male, White non-Hispanic Children Born in 2016") + xlab("popularity ranking of a name") + ylab("# of children with a name") + theme(plot.title = element_text(size = 11, hjust = 0.5))
+  labs(title = "Name Popularity vs Frequency of Name for Male, White non-Hispanic Children Born in 2016") + 
+  xlab("popularity ranking of a name") + 
+  ylab("# of children with a name") + 
+  theme(plot.title = element_text(size = 11, hjust = 0.5))
 
 ggsave("pop_vs_freq_names.pdf", pop_vs_freq_names, width = 8, height = 5)
 
 pop_vs_freq_names
 ```
-
-
