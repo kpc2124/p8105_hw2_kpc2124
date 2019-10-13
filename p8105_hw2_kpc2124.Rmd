@@ -159,10 +159,12 @@ pop_vs_freq_names =
   filter(gender == "MALE" & year_of_birth == 2016 & ethnicity == "WHITE NON HISPANIC") %>%
   ggplot(aes(x = rank, y = count)) +
   geom_point() +
-  labs(title = "Name Popularity vs Frequency of Name for Male, White non-Hispanic Children Born in 2016") + 
-  xlab("popularity ranking of a name") + 
-  ylab("# of children with a name") + 
-  theme(plot.title = element_text(size = 11, hjust = 0.5))
+  labs(
+    title = "Name Popularity vs Frequency of Name for Male, White non-Hispanic Children Born in 2016") + 
+    xlab("popularity ranking of a name") + 
+    ylab("# of children with a name") + 
+    theme(plot.title = element_text(size = 11, hjust = 0.5)
+  )
 
 ggsave("pop_vs_freq_names.pdf", pop_vs_freq_names, width = 8, height = 5)
 
